@@ -15,6 +15,14 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if (Auth::user()?->role?->role_name === 'Administrator')
+                        <x-nav-link :href="route('admin.users.pending')" :active="request()->routeIs('admin.users.pending')">
+                            {{ __('Pending Requests') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')">
+                            {{ __('User List') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +78,15 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if (Auth::user()?->role?->role_name === 'Administrator')
+                <x-responsive-nav-link :href="route('admin.users.pending')" :active="request()->routeIs('admin.users.pending')">
+                    {{ __('Pending Requests') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')">
+                    {{ __('User List') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

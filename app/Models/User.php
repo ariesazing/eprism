@@ -37,6 +37,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'approved_by',
         'approved_at',
         'last_login_at',
+        'rejection_reason',
+        'rejected_by',
+        'rejected_at',
     ];
 
     /**
@@ -60,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'rejected_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -87,6 +91,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function approvedUsers(): HasMany
     {
         return $this->hasMany(self::class, 'approved_by');
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'rejected_by');
+    }
+
+    public function rejectedUsers(): HasMany
+    {
+        return $this->hasMany(self::class, 'rejected_by');
     }
 
     public function getFullNameAttribute(): string
