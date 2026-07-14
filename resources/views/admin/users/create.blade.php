@@ -44,7 +44,12 @@
                             </div>
                             <div>
                                 <x-input-label for="position_title" :value="__('Position Title')" />
-                                <x-text-input id="position_title" name="position_title" type="text" class="mt-1 block w-full" :value="old('position_title')" required />
+                                <select id="position_title" name="position_title" class="mt-1 block w-full form-control-ui" required>
+                                    <option value="">{{ __('Select Position Title') }}</option>
+                                    @foreach ($positionTitles as $title)
+                                        <option value="{{ $title }}" @selected(old('position_title') === $title)>{{ $title }}</option>
+                                    @endforeach
+                                </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('position_title')" />
                             </div>
                         </div>

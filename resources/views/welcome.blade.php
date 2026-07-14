@@ -590,10 +590,10 @@
             <div class="hero-left">
                 <span class="eyebrow">
                     <span class="eyebrow-dot" aria-hidden="true"></span>
-                    DepEd Research Governance Portal
+                    DepEd Research Submission and Review Management Portal
                 </span>
 
-                <h1>E-PRISM streamlines DepEd research workflows.</h1>
+                <h1>E-PRISM streamlining DepEd research workflows.</h1>
 
                 <p class="lead">
                     Submit manuscripts, manage reviews, track revisions, and process approvals in one centralized portal built for researchers, reviewers, and administrators.

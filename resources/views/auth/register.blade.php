@@ -47,7 +47,12 @@
         <!-- Position Title -->
         <div class="mt-4">
             <x-input-label for="position_title" :value="__('Position Title')" />
-            <x-text-input id="position_title" class="block mt-1 w-full" type="text" name="position_title" :value="old('position_title')" required />
+            <select id="position_title" name="position_title" class="form-control-ui mt-1 block w-full" required>
+                <option value="">{{ __('Select Position Title') }}</option>
+                @foreach ($positionTitles as $title)
+                    <option value="{{ $title }}" @selected(old('position_title') === $title)>{{ $title }}</option>
+                @endforeach
+            </select>
             <x-input-error :messages="$errors->get('position_title')" class="mt-2" />
         </div>
 
@@ -61,7 +66,7 @@
         <!-- Organizational Unit -->
         <div class="mt-4">
             <x-input-label for="organizational_unit_id" :value="__('Organizational Unit')" />
-            <select id="organizational_unit_id" name="organizational_unit_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full" required>
+            <select id="organizational_unit_id" name="organizational_unit_id" class="form-control-ui mt-1 block w-full" required>
                 <option value="">{{ __('Select Unit') }}</option>
                 @foreach ($organizationalUnits as $unit)
                     <option value="{{ $unit->id }}" @selected(old('organizational_unit_id') == $unit->id)>

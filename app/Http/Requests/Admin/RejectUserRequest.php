@@ -22,6 +22,7 @@ class RejectUserRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'rejection_category' => ['required', 'string', 'in:policy_violation,fraud,incomplete_info,incorrect_info'],
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ];
     }

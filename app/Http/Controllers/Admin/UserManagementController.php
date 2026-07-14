@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RejectUserRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\EmailBlacklist;
 use App\Models\OrganizationalUnit;
 use App\Models\Role;
 use App\Models\User;
@@ -49,6 +50,8 @@ class UserManagementController extends Controller
             'rejected_at' => null,
         ]);
 
+        EmailBlacklist::query()->where('email', $user->email)->delete();
+
         return back()->with('status', 'User approved successfully.');
     }
 
@@ -60,6 +63,9 @@ class UserManagementController extends Controller
             return back()->withErrors(['status' => 'Inactive status is not configured.']);
         }
 
+        $rejectionCategory = $request->string('rejection_category')->toString();
+        $shouldBlacklist = in_array($rejectionCategory, ['policy_violation', 'fraud'], true);
+
         $user->update([
             'status_id' => $inactiveStatusId,
             'approved_by' => null,
@@ -69,7 +75,23 @@ class UserManagementController extends Controller
             'rejected_at' => now(),
         ]);
 
-        return back()->with('status', 'User request rejected.');
+        if ($shouldBlacklist) {
+            EmailBlacklist::query()->updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'reason_code' => $rejectionCategory,
+                    'reason_details' => $request->string('rejection_reason')->toString(),
+                    'blocked_by' => $request->user()->id,
+                    'blocked_at' => now(),
+                ]
+            );
+        } else {
+            EmailBlacklist::query()->where('email', $user->email)->delete();
+        }
+
+        return back()->with('status', $shouldBlacklist
+            ? 'User request rejected and email permanently blocked.'
+            : 'User request rejected. The user may re-register after correction.');
     }
 
     public function index(): View
@@ -88,6 +110,7 @@ class UserManagementController extends Controller
     public function create(): View
     {
         return view('admin.users.create', [
+            'positionTitles' => User::positionTitles(),
             'roles' => Role::query()->whereIn('role_name', ['Administrator', 'Reviewer'])->orderBy('role_name')->get(['id', 'role_name']),
             'organizationalUnits' => OrganizationalUnit::query()->orderBy('unit_name')->get(['id', 'unit_name', 'unit_code']),
         ]);
@@ -129,6 +152,7 @@ class UserManagementController extends Controller
     {
         return view('admin.users.edit', [
             'userRecord' => $user,
+            'positionTitles' => User::positionTitles(),
             'roles' => Role::query()->orderBy('role_name')->get(['id', 'role_name']),
             'statuses' => UserStatus::query()->orderBy('status_name')->get(['id', 'status_name']),
             'organizationalUnits' => OrganizationalUnit::query()->orderBy('unit_name')->get(['id', 'unit_name', 'unit_code']),

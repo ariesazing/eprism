@@ -10,15 +10,25 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'approved', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/account/pending-approval', function () {
+        if (request()->user()?->status?->status_name === 'Active') {
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.pending-approval');
+    })->name('account.pending');
+});
+
+Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin/users')->name('admin.users.')->group(function () {
+Route::middleware(['auth', 'approved', 'verified', 'admin'])->prefix('admin/users')->name('admin.users.')->group(function () {
     Route::get('/pending', [UserManagementController::class, 'pending'])->name('pending');
     Route::patch('/{user}/approve', [UserManagementController::class, 'approve'])->name('approve');
     Route::patch('/{user}/reject', [UserManagementController::class, 'reject'])->name('reject');

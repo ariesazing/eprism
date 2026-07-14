@@ -57,7 +57,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'position_title' => fake()->jobTitle(),
+            'position_title' => fake()->randomElement(User::positionTitles()),
             'contact_number' => fake()->optional()->numerify('09#########'),
             'status_id' => $statusId,
             'approved_by' => null,

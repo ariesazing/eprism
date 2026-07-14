@@ -54,6 +54,13 @@
                                             <form method="POST" action="{{ route('admin.users.reject', $user->id) }}" class="space-y-1">
                                                 @csrf
                                                 @method('PATCH')
+                                                <select name="rejection_category" class="form-control-ui text-sm" required>
+                                                    <option value="">{{ __('Select rejection category') }}</option>
+                                                    <option value="incomplete_info">{{ __('Incomplete Information') }}</option>
+                                                    <option value="incorrect_info">{{ __('Incorrect Information') }}</option>
+                                                    <option value="policy_violation">{{ __('Policy Violation') }}</option>
+                                                    <option value="fraud">{{ __('Fraud') }}</option>
+                                                </select>
                                                 <textarea name="rejection_reason" rows="2" class="form-control-ui text-sm" placeholder="{{ __('Rejection reason') }}" required></textarea>
                                                 <button type="submit" class="text-red-600 hover:underline">{{ __('Reject') }}</button>
                                             </form>

@@ -13,6 +13,47 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+    /**
+     * @return array<int, string>
+     */
+    public static function positionTitles(): array
+    {
+        return [
+            'Teacher I',
+            'Teacher II',
+            'Teacher III',
+
+            'Master Teacher I',
+            'Master Teacher II',
+            'Master Teacher III',
+            'Master Teacher IV',
+            'Master Teacher V',
+
+            'Head Teacher I',
+            'Head Teacher II',
+            'Head Teacher III',
+            'Head Teacher IV',
+            'Head Teacher V',
+            'Head Teacher VI',  
+
+            'Assistant School Principal I',
+            'Assistant School Principal II',
+            'Assistant School Principal III',
+
+            'School Principal I',
+            'School Principal II',
+            'School Principal III',
+            'School Principal IV',
+
+            'Project Development Officer I',
+            'Project Development Officer II',
+
+            'Senior Education Program Specialist',
+            'Education Program Supervisor',
+            'Public Schools District Supervisor',
+        ];
+    }
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 

@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
                     'last_name' => 'Administrator',
                     'suffix' => null,
                     'password' => 'password',
-                    'position_title' => 'System Administrator',
+                    'position_title' => 'Project Development Officer II',
                     'contact_number' => null,
                     'status_id' => $activeStatusId,
                     'approved_by' => null,

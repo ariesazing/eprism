@@ -33,7 +33,7 @@ class UpdateUserRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:100'],
             'suffix' => ['nullable', 'string', 'max:20'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($targetUser->id)],
-            'position_title' => ['required', 'string', 'max:150'],
+            'position_title' => ['required', Rule::in(User::positionTitles())],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'organizational_unit_id' => ['required', 'integer', 'exists:organizational_units,id'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],
