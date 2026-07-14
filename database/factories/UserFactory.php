@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\OrganizationalUnit;
+use App\Models\Role;
+use App\Models\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
@@ -24,12 +26,43 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $roleId = Role::query()->firstOrCreate(
+            ['role_name' => 'Proponent'],
+            ['description' => 'Research proponent']
+        )->id;
+
+        $statusId = UserStatus::query()->firstOrCreate(
+            ['status_name' => 'Active'],
+            ['description' => 'Allowed to access the system']
+        )->id;
+
+        $organizationalUnitId = OrganizationalUnit::query()->firstOrCreate(
+            ['unit_code' => 'DEFAULT-OU'],
+            [
+                'unit_name' => 'Default Organizational Unit',
+                'unit_type' => 'School',
+                'district' => null,
+                'address' => null,
+            ]
+        )->id;
+
         return [
-            'name' => fake()->name(),
+            'role_id' => $roleId,
+            'organizational_unit_id' => $organizationalUnitId,
+            'deped_id' => fake()->optional()->numerify('DEPED-########'),
+            'first_name' => fake()->firstName(),
+            'middle_name' => fake()->optional()->firstName(),
+            'last_name' => fake()->lastName(),
+            'suffix' => fake()->optional()->suffix(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'position_title' => fake()->jobTitle(),
+            'contact_number' => fake()->optional()->numerify('09#########'),
+            'status_id' => $statusId,
+            'approved_by' => null,
+            'approved_at' => null,
+            'last_login_at' => null,
         ];
     }
 

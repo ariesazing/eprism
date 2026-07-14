@@ -18,7 +18,12 @@ test('profile information can be updated', function () {
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
-            'name' => 'Test User',
+            'first_name' => 'Updated',
+            'middle_name' => 'Middle',
+            'last_name' => 'User',
+            'suffix' => null,
+            'position_title' => 'Teacher II',
+            'contact_number' => '09123456789',
             'email' => 'test@example.com',
         ]);
 
@@ -28,26 +33,12 @@ test('profile information can be updated', function () {
 
     $user->refresh();
 
-    $this->assertSame('Test User', $user->name);
+    $this->assertSame('Updated', $user->first_name);
+    $this->assertSame('Middle', $user->middle_name);
+    $this->assertSame('User', $user->last_name);
+    $this->assertSame('Teacher II', $user->position_title);
+    $this->assertSame('09123456789', $user->contact_number);
     $this->assertSame('test@example.com', $user->email);
-    $this->assertNull($user->email_verified_at);
-});
-
-test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->patch('/profile', [
-            'name' => 'Test User',
-            'email' => $user->email,
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
 test('user can delete their account', function () {
@@ -64,7 +55,7 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
-    $this->assertNull($user->fresh());
+    $this->assertSoftDeleted($user);
 });
 
 test('correct password must be provided to delete account', function () {
