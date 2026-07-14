@@ -7,7 +7,7 @@
 
     <div class="py-8">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="surface-card overflow-hidden">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="POST" action="{{ route('admin.users.update', $userRecord->id) }}" class="space-y-4">
                         @csrf

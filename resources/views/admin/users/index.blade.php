@@ -25,9 +25,9 @@
                 <div class="bg-red-100 text-red-800 px-4 py-3 rounded-md">{{ $errors->first('status') }}</div>
             @endif
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="surface-card overflow-hidden">
+                <div class="p-6 table-shell">
+                    <table>
                         <thead>
                             <tr>
                                 <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('Name') }}</th>
@@ -38,7 +38,7 @@
                                 <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                        <tbody>
                             @forelse ($users as $user)
                                 <tr>
                                     <td class="px-3 py-3 text-gray-900 dark:text-gray-100">{{ $user->full_name }}</td>

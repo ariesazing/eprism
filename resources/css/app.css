@@ -1,3 +1,151 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		--ep-bg-a: #f7f2ff;
+		--ep-bg-b: #ffffff;
+		--ep-primary: #6a11cb;
+		--ep-primary-600: #7b2fd0;
+		--ep-primary-300: #d8c5f8;
+		--ep-ink-900: #1f1838;
+		--ep-ink-700: #4b4466;
+		--ep-ink-500: #6d6786;
+		--ep-line: #e9e3f5;
+		--ep-surface: #ffffff;
+		--ep-success-bg: #eaf8ef;
+		--ep-success-fg: #16603b;
+		--ep-danger-bg: #feecf0;
+		--ep-danger-fg: #b42318;
+	}
+
+	html,
+	body {
+		font-family: 'Inter', sans-serif;
+		color: var(--ep-ink-900);
+		background:
+			radial-gradient(circle at 90% 8%, rgba(106, 17, 203, 0.12), transparent 44%),
+			radial-gradient(circle at 10% 82%, rgba(148, 118, 218, 0.16), transparent 42%),
+			linear-gradient(160deg, var(--ep-bg-a) 0%, var(--ep-bg-b) 42%, #ffffff 100%);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: 'Manrope', sans-serif;
+		letter-spacing: -0.01em;
+	}
+}
+
+@layer components {
+	.page-shell {
+		@apply min-h-screen;
+	}
+
+	.surface-card {
+		background: var(--ep-surface);
+		border: 1px solid var(--ep-line);
+		border-radius: 24px;
+		box-shadow: 0 14px 38px rgba(31, 24, 56, 0.08);
+	}
+
+	.btn-primary-ui {
+		@apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition duration-200 ease-in-out;
+		background: linear-gradient(135deg, var(--ep-primary), var(--ep-primary-600));
+		box-shadow: 0 10px 28px rgba(106, 17, 203, 0.28);
+	}
+
+	.btn-primary-ui:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 14px 34px rgba(106, 17, 203, 0.34);
+	}
+
+	.btn-secondary-ui {
+		@apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition duration-200 ease-in-out;
+		color: var(--ep-primary);
+		background: #fff;
+		border: 1px solid var(--ep-primary-300);
+	}
+
+	.btn-success-ui {
+		@apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold;
+		background: var(--ep-success-bg);
+		color: var(--ep-success-fg);
+		border: 1px solid #c7ecd6;
+	}
+
+	.btn-danger-ui {
+		@apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold;
+		background: var(--ep-danger-bg);
+		color: var(--ep-danger-fg);
+		border: 1px solid #facdd5;
+	}
+
+	.btn-ghost-ui {
+		@apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition;
+		color: var(--ep-ink-700);
+		background: transparent;
+	}
+
+	.btn-ghost-ui:hover {
+		background: #f6f0ff;
+	}
+
+	.form-control-ui {
+		@apply block w-full rounded-2xl border px-4 py-3.5 text-sm shadow-sm transition;
+		border-color: #dcd5ea;
+		background: #fff;
+	}
+
+	.form-control-ui:focus {
+		border-color: var(--ep-primary);
+		box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.16);
+		outline: none;
+	}
+
+	.label-ui {
+		@apply mb-1.5 block text-sm font-semibold;
+		color: var(--ep-ink-700);
+	}
+
+	.help-ui {
+		@apply mt-1 text-xs;
+		color: var(--ep-ink-500);
+	}
+
+	.error-ui {
+		@apply mt-1 text-xs font-medium;
+		color: var(--ep-danger-fg);
+	}
+
+	.table-shell {
+		@apply overflow-x-auto rounded-3xl border;
+		border-color: var(--ep-line);
+		background: #fff;
+	}
+
+	.table-shell table {
+		@apply min-w-full;
+	}
+
+	.table-shell thead th {
+		@apply sticky top-0 z-10 border-b px-4 py-3 text-left text-xs font-semibold uppercase;
+		border-color: var(--ep-line);
+		color: var(--ep-ink-500);
+		background: #faf7ff;
+	}
+
+	.table-shell tbody td {
+		@apply border-b px-4 py-3 text-sm;
+		border-color: #f0ebfa;
+		color: var(--ep-ink-700);
+	}
+
+	.table-shell tbody tr:hover {
+		background: #faf7ff;
+	}
+}
