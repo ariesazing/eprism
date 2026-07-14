@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
 
         if ($adminRoleId && $activeStatusId && $defaultUnitId) {
             User::query()->firstOrCreate(
-                ['email' => 'admin@example.com'],
+                ['email' => 'ariezpanganiban09@gmail.com'],
                 [
                     'role_id' => $adminRoleId,
                     'organizational_unit_id' => $defaultUnitId,
