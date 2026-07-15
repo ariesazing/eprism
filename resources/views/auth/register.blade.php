@@ -1,4 +1,8 @@
 <x-guest-layout>
+    <div
+        x-data="{ showVerificationModal: @js((bool) session('registration_verification_sent')) }"
+        x-cloak
+    >
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -110,4 +114,37 @@
             </x-primary-button>
         </div>
     </form>
+
+    <div
+        x-show="showVerificationModal"
+        x-transition.opacity
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+        style="display: none;"
+        @keydown.escape.window="showVerificationModal = false"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="registration-verification-title"
+    >
+        <div
+            x-show="showVerificationModal"
+            x-transition
+            class="w-full max-w-lg rounded-xl bg-white p-5 sm:p-6 shadow-xl dark:bg-gray-800"
+            @click.away="showVerificationModal = false"
+        >
+            <h2 id="registration-verification-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {{ __('Check your email') }}
+            </h2>
+
+            <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ session('registration_verification_message') }}
+            </p>
+
+            <div class="mt-6 flex justify-end">
+                <x-primary-button type="button" x-on:click="showVerificationModal = false">
+                    {{ __('OK') }}
+                </x-primary-button>
+            </div>
+        </div>
+    </div>
+    </div>
 </x-guest-layout>

@@ -17,6 +17,9 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+    Route::get('register/pre-verify/{token}', [RegisteredUserController::class, 'verifyPreRegistration'])
+        ->name('register.pre-verify');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 

@@ -29,25 +29,35 @@ class DatabaseSeeder extends Seeder
         $defaultUnitId = OrganizationalUnit::query()->value('id');
 
         if ($adminRoleId && $activeStatusId && $defaultUnitId) {
-            User::query()->firstOrCreate(
-                ['email' => 'admin@gmail.com'],
-                [
-                    'role_id' => $adminRoleId,
-                    'organizational_unit_id' => $defaultUnitId,
-                    'deped_id' => 'ADMIN-0001',
-                    'first_name' => 'System',
-                    'middle_name' => null,
-                    'last_name' => 'Administrator',
-                    'suffix' => null,
-                    'password' => 'password',
-                    'position_title' => 'Project Development Officer II',
-                    'contact_number' => null,
-                    'status_id' => $activeStatusId,
-                    'approved_by' => null,
-                    'approved_at' => now(),
-                    'last_login_at' => null,
-                ]
-            );
+            $adminUser = User::query()
+                ->where('email', 'admin@gmail.com')
+                ->orWhere('deped_id', 'ADMIN-0001')
+                ->first();
+
+            if (! $adminUser) {
+                $adminUser = new User();
+            }
+
+            $adminUser->fill([
+                'role_id' => $adminRoleId,
+                'organizational_unit_id' => $defaultUnitId,
+                'deped_id' => 'ADMIN-0001',
+                'first_name' => 'System',
+                'middle_name' => null,
+                'last_name' => 'Administrator',
+                'suffix' => null,
+                'email' => 'admin@gmail.com',
+                'password' => 'password',
+                'position_title' => 'School Principal I',
+                'contact_number' => null,
+                'status_id' => $activeStatusId,
+                'approved_by' => null,
+                'approved_at' => now(),
+                'email_verified_at' => now(),
+                'last_login_at' => null,
+            ]);
+
+            $adminUser->save();
         }
     }
 }
