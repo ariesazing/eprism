@@ -9,6 +9,9 @@ use App\Models\Research;
 use App\Models\ResearchProponent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResearchProponentController extends Controller
 {
@@ -16,7 +19,18 @@ class ResearchProponentController extends Controller
     {
         $this->authorizeAccess($request, $research);
 
-        $research->proponents()->create($request->safe()->except('organizational_unit_id'));
+        $photo = $request->file('photo');
+        $photoFilename = Str::uuid().'.'.$photo->getClientOriginalExtension();
+        $photoDirectory = 'research_proponents/'.$research->research_code;
+        $photoDisk = 'local';
+        $photoPath = $photo->storeAs($photoDirectory, $photoFilename, $photoDisk);
+
+        $research->proponents()->create([
+            ...$request->safe()->except('organizational_unit_id', 'photo'),
+            'photo_path' => $photoPath,
+            'photo_disk' => $photoDisk,
+            'photo_filename' => $photoFilename,
+        ]);
 
         return back()->with('status', 'Research proponent added successfully.');
     }
@@ -25,7 +39,28 @@ class ResearchProponentController extends Controller
     {
         $this->authorizeProponentAccess($request, $research, $proponent);
 
-        $proponent->update($request->safe()->except('organizational_unit_id'));
+        $payload = $request->safe()->except('organizational_unit_id', 'photo');
+
+        if ($request->hasFile('photo')) {
+            if ($proponent->photo_path !== null && $proponent->photo_disk !== null) {
+                Storage::disk($proponent->photo_disk)->delete($proponent->photo_path);
+            }
+
+            $photo = $request->file('photo');
+            $photoFilename = Str::uuid().'.'.$photo->getClientOriginalExtension();
+            $photoDirectory = 'research_proponents/'.$research->research_code;
+            $photoDisk = 'local';
+            $photoPath = $photo->storeAs($photoDirectory, $photoFilename, $photoDisk);
+
+            $payload = [
+                ...$payload,
+                'photo_path' => $photoPath,
+                'photo_disk' => $photoDisk,
+                'photo_filename' => $photoFilename,
+            ];
+        }
+
+        $proponent->update($payload);
 
         return back()->with('status', 'Research proponent updated successfully.');
     }
@@ -34,9 +69,22 @@ class ResearchProponentController extends Controller
     {
         $this->authorizeProponentAccess($request, $research, $proponent);
 
+        if ($proponent->photo_path !== null && $proponent->photo_disk !== null) {
+            Storage::disk($proponent->photo_disk)->delete($proponent->photo_path);
+        }
+
         $proponent->delete();
 
         return back()->with('status', 'Research proponent removed successfully.');
+    }
+
+    public function photo(Request $request, Research $research, ResearchProponent $proponent): BinaryFileResponse
+    {
+        $this->authorizeProponentAccess($request, $research, $proponent);
+
+        abort_unless($proponent->photo_path !== null && $proponent->photo_disk !== null, 404);
+
+        return response()->file(Storage::disk($proponent->photo_disk)->path($proponent->photo_path));
     }
 
     private function authorizeProponentAccess(Request $request, Research $research, ResearchProponent $proponent): void

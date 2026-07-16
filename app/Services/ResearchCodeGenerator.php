@@ -11,7 +11,7 @@ class ResearchCodeGenerator
         $year = now()->format('Y');
         $prefix = 'RSH-'.$year.'-';
 
-        $latestCode = Research::query()
+        $latestCode = Research::withTrashed()
             ->where('research_code', 'like', $prefix.'%')
             ->orderByDesc('research_code')
             ->value('research_code');
@@ -25,6 +25,11 @@ class ResearchCodeGenerator
             }
         }
 
-        return $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        do {
+            $generatedCode = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+            $nextNumber++;
+        } while (Research::withTrashed()->where('research_code', $generatedCode)->exists());
+
+        return $generatedCode;
     }
 }

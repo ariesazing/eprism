@@ -23,6 +23,9 @@ class ResearchProponent extends Model
         'organizational_unit_name',
         'email',
         'contact_number',
+        'photo_path',
+        'photo_disk',
+        'photo_filename',
     ];
 
     public function research(): BelongsTo

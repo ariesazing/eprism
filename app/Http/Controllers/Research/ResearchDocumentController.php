@@ -26,7 +26,9 @@ class ResearchDocumentController extends Controller
 
         ResearchDocument::query()->create([
             'research_id' => $research->id,
-            'document_type' => $request->string('document_type')->toString(),
+            'document_type' => $request->string('document_class')->toString() === 'research_documentation'
+                ? 'Research Documentation'
+                : 'Research Document',
             'original_filename' => $uploadedFile->getClientOriginalName(),
             'stored_filename' => $storedFilename,
             'file_path' => $storedPath,

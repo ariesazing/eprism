@@ -45,6 +45,7 @@ class StoreResearchProponentRequest extends FormRequest
             'organizational_unit_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'contact_number' => ['required', 'string', 'max:20'],
+            'photo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
         ];
     }
 
@@ -56,6 +57,7 @@ class StoreResearchProponentRequest extends FormRequest
         return [
             'middle_name' => 'middle initial',
             'organizational_unit_id' => 'organizational unit',
+            'photo' => 'proponent photo',
         ];
     }
 }

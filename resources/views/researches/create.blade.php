@@ -4,12 +4,12 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form method="POST" action="{{ route('researches.store') }}">
+                    <form method="POST" action="{{ route('researches.store') }}" enctype="multipart/form-data">
                         @php($research = null)
-                        @php($submitLabel = 'Create Research Draft')
+                        @php($submitLabel = 'Submit Research')
                         @include('researches._form')
                     </form>
                 </div>

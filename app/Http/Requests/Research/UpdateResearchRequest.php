@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Research;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateResearchRequest extends FormRequest
 {
@@ -20,7 +19,7 @@ class UpdateResearchRequest extends FormRequest
         $statusRules = ['nullable', 'integer', 'exists:research_statuses,id'];
 
         if ($this->user()?->role?->role_name !== 'Administrator') {
-            $statusRules[] = Rule::prohibited();
+            $statusRules[] = 'prohibited';
         }
 
         return [

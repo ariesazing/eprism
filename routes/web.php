@@ -32,7 +32,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 });
 
 Route::middleware(['auth', 'approved', 'verified'])->group(function () {
-    Route::resource('researches', ResearchController::class);
+    Route::resource('researches', ResearchController::class)->except(['edit']);
     Route::post('/researches/{research}/submit', [ResearchController::class, 'submit'])
         ->name('researches.submit');
 
@@ -45,6 +45,8 @@ Route::middleware(['auth', 'approved', 'verified'])->group(function () {
 
     Route::post('/researches/{research}/proponents', [ResearchProponentController::class, 'store'])
         ->name('researches.proponents.store');
+    Route::get('/researches/{research}/proponents/{proponent}/photo', [ResearchProponentController::class, 'photo'])
+        ->name('researches.proponents.photo');
     Route::put('/researches/{research}/proponents/{proponent}', [ResearchProponentController::class, 'update'])
         ->name('researches.proponents.update');
     Route::delete('/researches/{research}/proponents/{proponent}', [ResearchProponentController::class, 'destroy'])

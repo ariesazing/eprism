@@ -17,7 +17,7 @@ class StoreResearchDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document_type' => ['required', 'string', 'max:100'],
+            'document_class' => ['required', 'string', 'in:research_documentation'],
             'file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ];
     }
