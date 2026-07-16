@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Research\ResearchController;
+use App\Http\Controllers\Research\ResearchDocumentController;
+use App\Http\Controllers\Research\ResearchProponentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,6 +29,26 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'approved', 'verified'])->group(function () {
+    Route::resource('researches', ResearchController::class);
+    Route::post('/researches/{research}/submit', [ResearchController::class, 'submit'])
+        ->name('researches.submit');
+
+    Route::post('/researches/{research}/documents', [ResearchDocumentController::class, 'store'])
+        ->name('researches.documents.store');
+    Route::get('/researches/{research}/documents/{document}/download', [ResearchDocumentController::class, 'download'])
+        ->name('researches.documents.download');
+    Route::delete('/researches/{research}/documents/{document}', [ResearchDocumentController::class, 'destroy'])
+        ->name('researches.documents.destroy');
+
+    Route::post('/researches/{research}/proponents', [ResearchProponentController::class, 'store'])
+        ->name('researches.proponents.store');
+    Route::put('/researches/{research}/proponents/{proponent}', [ResearchProponentController::class, 'update'])
+        ->name('researches.proponents.update');
+    Route::delete('/researches/{research}/proponents/{proponent}', [ResearchProponentController::class, 'destroy'])
+        ->name('researches.proponents.destroy');
 });
 
 Route::middleware(['auth', 'approved', 'verified', 'admin'])->prefix('admin/users')->name('admin.users.')->group(function () {

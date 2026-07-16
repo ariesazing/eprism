@@ -22,6 +22,7 @@ it('has all module 2 tables after migration', function (): void {
 it('contains module 2 seed values after seeding', function (): void {
     Artisan::call('db:seed');
 
+    expect(DB::table('research_statuses')->where('status_name', 'Draft')->exists())->toBeTrue();
     expect(DB::table('research_categories')->where('category_name', 'Action Research')->exists())->toBeTrue();
     expect(DB::table('research_categories')->where('category_name', 'Basic Research')->exists())->toBeTrue();
 

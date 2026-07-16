@@ -20,10 +20,10 @@
             <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
         </div>
 
-        <!-- Middle Name -->
+        <!-- Middle Initial -->
         <div class="mt-4">
-            <x-input-label for="middle_name" :value="__('Middle Name (Optional)')" />
-            <x-text-input id="middle_name" class="block mt-1 w-full" type="text" name="middle_name" :value="old('middle_name')" />
+            <x-input-label for="middle_name" :value="__('Middle Initial')" />
+            <x-text-input id="middle_name" class="block mt-1 w-full" type="text" name="middle_name" :value="old('middle_name')" maxlength="1" required />
             <x-input-error :messages="$errors->get('middle_name')" class="mt-2" />
         </div>
 

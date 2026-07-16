@@ -14,6 +14,12 @@ class ResearchStatusSeeder extends Seeder
     {
         \App\Models\ResearchStatus::query()->upsert([
             [
+                'status_name' => 'Draft',
+                'description' => 'Research draft is awaiting completion before final submission',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
                 'status_name' => 'Submitted',
                 'description' => 'Research has been successfully submitted',
                 'created_at' => now(),

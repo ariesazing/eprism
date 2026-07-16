@@ -43,6 +43,10 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge([
+            'middle_name' => Str::upper(trim((string) $request->input('middle_name', ''))),
+        ]);
+
         $submittedEmail = strtolower((string) $request->input('email'));
 
         if ($submittedEmail !== '' && EmailBlacklist::query()->where('email', $submittedEmail)->exists()) {
@@ -63,7 +67,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'deped_id' => ['nullable', 'string', 'max:30', Rule::unique('users', 'deped_id')->ignore($reRegistrationCandidate?->id)],
             'first_name' => ['required', 'string', 'max:100'],
-            'middle_name' => ['nullable', 'string', 'max:100'],
+            'middle_name' => ['required', 'string', 'size:1', 'regex:/^[A-Z]$/'],
             'last_name' => ['required', 'string', 'max:100'],
             'suffix' => ['nullable', 'string', 'max:20'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($reRegistrationCandidate?->id)],
@@ -83,7 +87,7 @@ class RegisteredUserController extends Controller
                 'registration_payload' => [
                     'deped_id' => $request->deped_id,
                     'first_name' => $request->first_name,
-                    'middle_name' => $request->middle_name,
+                    'middle_name' => Str::upper($request->string('middle_name')->toString()),
                     'last_name' => $request->last_name,
                     'suffix' => $request->suffix,
                     'email' => $submittedEmail,

@@ -13,6 +13,13 @@ class Research extends Model
     use HasFactory, SoftDeletes;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'researches';
+
+    /**
      * @var list<string>
      */
     protected $fillable = [
