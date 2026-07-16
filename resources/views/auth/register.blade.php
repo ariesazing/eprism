@@ -131,7 +131,7 @@
             class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800"
             @click.away="showVerificationModal = false"
         >
-            <h2 id="registration-verification-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h2 id="registration-verification-title" class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Check your email') }}
             </h2>
 

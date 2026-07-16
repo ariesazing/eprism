@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('User List') }}
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('User Management') }}
             </h2>
             <div class="flex items-center gap-2">
                 <a href="{{ route('admin.users.pending') }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-400">

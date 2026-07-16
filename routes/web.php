@@ -53,6 +53,18 @@ Route::middleware(['auth', 'approved', 'verified'])->group(function () {
         ->name('researches.proponents.destroy');
 });
 
+Route::middleware(['auth', 'approved', 'verified'])->prefix('proponent')->name('proponent.')->group(function () {
+    Route::view('/revisions', 'proponent.revisions')->name('revisions');
+    Route::view('/announcements', 'proponent.announcements')->name('announcements');
+});
+
+Route::middleware(['auth', 'approved', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::view('/repository', 'admin.repository')->name('repository');
+    Route::view('/reports', 'admin.reports')->name('reports');
+    Route::view('/templates', 'admin.templates')->name('templates');
+    Route::view('/announcements', 'admin.announcements')->name('announcements');
+});
+
 Route::middleware(['auth', 'approved', 'verified', 'admin'])->prefix('admin/users')->name('admin.users.')->group(function () {
     Route::get('/pending', [UserManagementController::class, 'pending'])->name('pending');
     Route::patch('/{user}/approve', [UserManagementController::class, 'approve'])->name('approve');

@@ -299,14 +299,17 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900">Research Document Upload and Storage Management (Local)</h3>
-                <p class="mt-1 text-sm text-gray-500">Upload additional or supporting PDF files under Research Documentation.</p>
+                <p class="mt-1 text-sm text-gray-500">Upload updated PDF files for Research Manuscript, Narrative Form Document, or Research Documentation.</p>
 
                 <form method="POST" action="{{ route('researches.documents.store', $research) }}" enctype="multipart/form-data" class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
                     @csrf
-                    <input type="hidden" name="document_class" value="research_documentation" />
                     <div>
-                        <x-input-label :value="__('Document Type')" />
-                        <x-text-input type="text" class="mt-1 block w-full bg-gray-50" value="Research Documentation" readonly />
+                        <x-input-label for="document_class" :value="__('Document Type')" />
+                        <select id="document_class" name="document_class" class="mt-1 block w-full rounded-md border-gray-300" required>
+                            <option value="research_manuscript" @selected(old('document_class') === 'research_manuscript')>Research Manuscript</option>
+                            <option value="narrative_form_document" @selected(old('document_class') === 'narrative_form_document')>Narrative Form Document</option>
+                            <option value="research_documentation" @selected(old('document_class', 'research_documentation') === 'research_documentation')>Research Documentation</option>
+                        </select>
                         <x-input-error :messages="$errors->get('document_class')" class="mt-2" />
                     </div>
                     <div class="md:col-span-2">
@@ -316,7 +319,7 @@
                         <x-input-error :messages="$errors->get('file')" class="mt-2" />
                     </div>
                     <div class="md:col-span-3">
-                        <x-primary-button>Upload Document</x-primary-button>
+                        <x-primary-button>Upload or Update Document</x-primary-button>
                     </div>
                 </form>
 

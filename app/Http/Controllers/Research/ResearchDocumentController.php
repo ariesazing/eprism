@@ -18,17 +18,45 @@ class ResearchDocumentController extends Controller
     {
         $this->authorizeAccess($request, $research);
 
+        $documentType = match ($request->string('document_class')->toString()) {
+            'research_manuscript' => 'Research Manuscript',
+            'narrative_form_document' => 'Narrative Form Document',
+            default => 'Research Documentation',
+        };
+
         $uploadedFile = $request->file('file');
         $storedFilename = Str::uuid().'.'.$uploadedFile->getClientOriginalExtension();
 
         $directory = 'research_documents/'.$research->research_code;
         $storedPath = $uploadedFile->storeAs($directory, $storedFilename, 'local');
 
+        $existingDocument = ResearchDocument::query()
+            ->where('research_id', $research->id)
+            ->where('document_type', $documentType)
+            ->latest('uploaded_at')
+            ->first();
+
+        if ($existingDocument) {
+            Storage::disk($existingDocument->storage_disk)->delete($existingDocument->file_path);
+
+            $existingDocument->update([
+                'original_filename' => $uploadedFile->getClientOriginalName(),
+                'stored_filename' => $storedFilename,
+                'file_path' => $storedPath,
+                'storage_disk' => 'local',
+                'file_extension' => strtolower((string) $uploadedFile->getClientOriginalExtension()),
+                'mime_type' => (string) $uploadedFile->getClientMimeType(),
+                'file_size' => $uploadedFile->getSize(),
+                'uploaded_by' => $request->user()->id,
+                'uploaded_at' => now(),
+            ]);
+
+            return back()->with('status', $documentType.' updated successfully.');
+        }
+
         ResearchDocument::query()->create([
             'research_id' => $research->id,
-            'document_type' => $request->string('document_class')->toString() === 'research_documentation'
-                ? 'Research Documentation'
-                : 'Research Document',
+            'document_type' => $documentType,
             'original_filename' => $uploadedFile->getClientOriginalName(),
             'stored_filename' => $storedFilename,
             'file_path' => $storedPath,
@@ -40,7 +68,7 @@ class ResearchDocumentController extends Controller
             'uploaded_at' => now(),
         ]);
 
-        return back()->with('status', 'Research document uploaded successfully.');
+        return back()->with('status', $documentType.' uploaded successfully.');
     }
 
     public function download(Request $request, Research $research, ResearchDocument $document): BinaryFileResponse

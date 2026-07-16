@@ -15,15 +15,44 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
-                        {{ __('Researches') }}
-                    </x-nav-link>
                     @if (Auth::user()?->role?->role_name === 'Administrator')
-                        <x-nav-link :href="route('admin.users.pending')" :active="request()->routeIs('admin.users.pending')">
-                            {{ __('Pending Requests') }}
+                        <x-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
+                            {{ __('Research') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')">
-                            {{ __('User List') }}
+                        <x-nav-link :href="route('admin.repository')" :active="request()->routeIs('admin.repository')">
+                            {{ __('Repository') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            {{ __('User Management') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.reports')" :active="request()->routeIs('admin.reports')">
+                            {{ __('Reports & Analytics') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.templates')" :active="request()->routeIs('admin.templates')">
+                            {{ __('Templates') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.announcements')" :active="request()->routeIs('admin.announcements')">
+                            {{ __('Announcements') }}
+                        </x-nav-link>
+                    @elseif (Auth::user()?->role?->role_name === 'Proponent')
+                        <x-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.index') || request()->routeIs('researches.show')">
+                            {{ __('My Research') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('researches.create')" :active="request()->routeIs('researches.create')">
+                            {{ __('Submit Research') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('proponent.revisions')" :active="request()->routeIs('proponent.revisions')">
+                            {{ __('Revisions') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('proponent.announcements')" :active="request()->routeIs('proponent.announcements')">
+                            {{ __('Announcements') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                            {{ __('Profile') }}
+                        </x-nav-link>
+                    @else
+                        <x-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
+                            {{ __('Research') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -88,16 +117,44 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
-                {{ __('Researches') }}
-            </x-responsive-nav-link>
-
             @if (Auth::user()?->role?->role_name === 'Administrator')
-                <x-responsive-nav-link :href="route('admin.users.pending')" :active="request()->routeIs('admin.users.pending')">
-                    {{ __('Pending Requests') }}
+                <x-responsive-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
+                    {{ __('Research') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')">
-                    {{ __('User List') }}
+                <x-responsive-nav-link :href="route('admin.repository')" :active="request()->routeIs('admin.repository')">
+                    {{ __('Repository') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('User Management') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.reports')" :active="request()->routeIs('admin.reports')">
+                    {{ __('Reports & Analytics') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.templates')" :active="request()->routeIs('admin.templates')">
+                    {{ __('Templates') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.announcements')" :active="request()->routeIs('admin.announcements')">
+                    {{ __('Announcements') }}
+                </x-responsive-nav-link>
+            @elseif (Auth::user()?->role?->role_name === 'Proponent')
+                <x-responsive-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.index') || request()->routeIs('researches.show')">
+                    {{ __('My Research') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('researches.create')" :active="request()->routeIs('researches.create')">
+                    {{ __('Submit Research') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('proponent.revisions')" :active="request()->routeIs('proponent.revisions')">
+                    {{ __('Revisions') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('proponent.announcements')" :active="request()->routeIs('proponent.announcements')">
+                    {{ __('Announcements') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                    {{ __('Profile') }}
+                </x-responsive-nav-link>
+            @else
+                <x-responsive-nav-link :href="route('researches.index')" :active="request()->routeIs('researches.*')">
+                    {{ __('Research') }}
                 </x-responsive-nav-link>
             @endif
         </div>
