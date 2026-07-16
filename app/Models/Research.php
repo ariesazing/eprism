@@ -81,4 +81,12 @@ class Research extends Model
     {
         return $this->hasMany(\App\Models\ResearchDocument::class);
     }
+
+    /**
+     * @return HasMany<ResearchVersion, $this>
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(\App\Models\ResearchVersion::class);
+    }
 }

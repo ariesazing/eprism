@@ -10,6 +10,7 @@ use App\Models\Research;
 use App\Models\ResearchCategory;
 use App\Models\ResearchStatus;
 use App\Services\ResearchCodeGenerator;
+use App\Services\ResearchVersioningService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,7 +59,11 @@ class ResearchController extends Controller
         ]);
     }
 
-    public function store(StoreResearchRequest $request, ResearchCodeGenerator $codeGenerator): RedirectResponse
+    public function store(
+        StoreResearchRequest $request,
+        ResearchCodeGenerator $codeGenerator,
+        ResearchVersioningService $researchVersioningService,
+    ): RedirectResponse
     {
         for ($attempt = 0; $attempt < 3; $attempt++) {
             $storedDocumentPaths = [];
@@ -159,6 +164,13 @@ class ResearchController extends Controller
                     ]);
                 }
 
+                $researchVersioningService->snapshotSubmission(
+                    $research,
+                    $request->user(),
+                    'Proposal',
+                    'Initial proposal submission.'
+                );
+
                 DB::commit();
 
                 return redirect()->route('researches.show', $research)->with(
@@ -197,7 +209,11 @@ class ResearchController extends Controller
         abort(500, 'Unable to submit research at this time.');
     }
 
-    public function submit(Request $request, Research $research): RedirectResponse
+    public function submit(
+        Request $request,
+        Research $research,
+        ResearchVersioningService $researchVersioningService,
+    ): RedirectResponse
     {
         $this->authorizeAccess($request, $research);
 
@@ -240,6 +256,13 @@ class ResearchController extends Controller
             'status_id' => $submittedStatusId,
             'submitted_at' => $research->submitted_at ?? now(),
         ]);
+
+        $researchVersioningService->snapshotSubmission(
+            $research->fresh('documents'),
+            $request->user(),
+            'Proposal',
+            'Submitted revision snapshot.'
+        );
 
         return back()->with('status', 'Research submitted successfully.');
     }

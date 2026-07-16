@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ResearchStatus extends Model
+class SubmissionType extends Model
 {
     use HasFactory;
 
@@ -14,23 +14,15 @@ class ResearchStatus extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'status_name',
+        'type_name',
         'description',
     ];
-
-    /**
-     * @return HasMany<Research, $this>
-     */
-    public function researches(): HasMany
-    {
-        return $this->hasMany(Research::class, 'status_id');
-    }
 
     /**
      * @return HasMany<ResearchVersion, $this>
      */
     public function researchVersions(): HasMany
     {
-        return $this->hasMany(\App\Models\ResearchVersion::class, 'status_id');
+        return $this->hasMany(\App\Models\ResearchVersion::class);
     }
 }

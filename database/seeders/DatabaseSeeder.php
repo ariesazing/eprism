@@ -6,6 +6,7 @@ use App\Models\OrganizationalUnit;
 use App\Models\Role;
 use App\Models\UserStatus;
 use App\Models\User;
+use Database\Seeders\SubmissionTypeSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,6 +25,7 @@ class DatabaseSeeder extends Seeder
             OrganizationalUnitSeeder::class,
             \Database\Seeders\ResearchCategorySeeder::class,
             \Database\Seeders\ResearchStatusSeeder::class,
+            SubmissionTypeSeeder::class,
         ]);
 
         $adminRoleId = Role::query()->where('role_name', 'Administrator')->value('id');

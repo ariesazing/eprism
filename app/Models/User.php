@@ -169,4 +169,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\ResearchDocument::class, 'uploaded_by');
     }
+
+    /**
+     * @return HasMany<ResearchVersion, $this>
+     */
+    public function submittedResearchVersions(): HasMany
+    {
+        return $this->hasMany('App\\Models\\ResearchVersion', 'submitted_by');
+    }
+
+    /**
+     * @return HasMany<VersionFile, $this>
+     */
+    public function uploadedVersionFiles(): HasMany
+    {
+        return $this->hasMany('App\\Models\\VersionFile', 'uploaded_by');
+    }
 }

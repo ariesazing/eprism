@@ -5,6 +5,7 @@ use App\Models\ResearchCategory;
 use App\Models\ResearchDocument;
 use App\Models\ResearchProponent;
 use App\Models\ResearchStatus;
+use App\Models\SubmissionType;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -61,9 +62,18 @@ test('research submission creates the research, initial proponent, and all requi
     expect($research->submitted_at)->not->toBeNull();
     expect($research->proponents()->count())->toBe(1);
     expect($research->documents()->count())->toBe(3);
+    expect($research->versions()->count())->toBe(1);
+    expect($research->versions()->where('is_current', true)->exists())->toBeTrue();
     expect($research->proponents()->first()?->email)->toBe('john.doe@example.com');
     expect($research->documents()->pluck('document_type')->all())
         ->toMatchArray(['Research Manuscript', 'Narrative Form Document', 'Research Documentation']);
+
+    $version = $research->versions()->with('files', 'submissionType')->firstOrFail();
+
+    expect($version->submissionType?->type_name)->toBe('Proposal');
+    expect($version->files()->count())->toBe(3);
+    expect($version->files()->pluck('document_name')->sort()->values()->all())
+        ->toBe(['Narrative Form Document', 'Research Documentation', 'Research Manuscript']);
 });
 
 test('research creation skips soft deleted research codes', function () {
@@ -310,6 +320,117 @@ test('research can be submitted once a proponent and all required pdf documents 
     $research->refresh();
     expect($research->status?->status_name)->toBe('Submitted');
     expect($research->submitted_at)->not->toBeNull();
+    expect($research->versions()->count())->toBe(1);
+
+    $version = $research->versions()->with('files', 'submissionType')->firstOrFail();
+
+    expect($version->submissionType?->type_name)->toBe('Proposal');
+    expect($version->files()->count())->toBe(3);
+});
+
+test('resubmitting after document changes creates a new research version snapshot', function () {
+    Storage::fake('local');
+
+    $user = User::factory()->create();
+    $category = ResearchCategory::factory()->create();
+    $submittedStatus = ResearchStatus::query()->firstOrCreate([
+        'status_name' => 'Submitted',
+    ], [
+        'description' => 'Research has been successfully submitted',
+    ]);
+    SubmissionType::query()->firstOrCreate([
+        'type_name' => 'Proposal',
+    ], [
+        'description' => 'Proposal stage submission.',
+    ]);
+
+    $research = Research::factory()->create([
+        'lead_proponent_id' => $user->id,
+        'organizational_unit_id' => $user->organizational_unit_id,
+        'category_id' => $category->id,
+        'status_id' => $submittedStatus->id,
+        'submitted_at' => now()->subDay(),
+    ]);
+
+    ResearchProponent::query()->create([
+        'research_id' => $research->id,
+        'first_name' => 'Jane',
+        'middle_name' => 'Q',
+        'last_name' => 'Researcher',
+        'suffix' => null,
+        'position_title' => 'Teacher I',
+        'organizational_unit_name' => 'Default Organizational Unit',
+        'email' => 'jane@example.com',
+        'contact_number' => '09123456789',
+        'photo_path' => 'research_proponents/'.$research->research_code.'/jane.jpg',
+        'photo_disk' => 'local',
+        'photo_filename' => 'jane.jpg',
+    ]);
+
+    $manuscript = ResearchDocument::query()->create([
+        'research_id' => $research->id,
+        'document_type' => 'Research Manuscript',
+        'original_filename' => 'manuscript-v1.pdf',
+        'stored_filename' => 'stored-manuscript-v1.pdf',
+        'file_path' => 'research_documents/'.$research->research_code.'/stored-manuscript-v1.pdf',
+        'storage_disk' => 'local',
+        'file_extension' => 'pdf',
+        'mime_type' => 'application/pdf',
+        'file_size' => 1024,
+        'uploaded_by' => $user->id,
+        'uploaded_at' => now()->subDay(),
+    ]);
+
+    ResearchDocument::query()->create([
+        'research_id' => $research->id,
+        'document_type' => 'Narrative Form Document',
+        'original_filename' => 'narrative-v1.pdf',
+        'stored_filename' => 'stored-narrative-v1.pdf',
+        'file_path' => 'research_documents/'.$research->research_code.'/stored-narrative-v1.pdf',
+        'storage_disk' => 'local',
+        'file_extension' => 'pdf',
+        'mime_type' => 'application/pdf',
+        'file_size' => 1024,
+        'uploaded_by' => $user->id,
+        'uploaded_at' => now()->subDay(),
+    ]);
+
+    ResearchDocument::query()->create([
+        'research_id' => $research->id,
+        'document_type' => 'Research Documentation',
+        'original_filename' => 'documentation-v1.pdf',
+        'stored_filename' => 'stored-documentation-v1.pdf',
+        'file_path' => 'research_documents/'.$research->research_code.'/stored-documentation-v1.pdf',
+        'storage_disk' => 'local',
+        'file_extension' => 'pdf',
+        'mime_type' => 'application/pdf',
+        'file_size' => 1024,
+        'uploaded_by' => $user->id,
+        'uploaded_at' => now()->subDay(),
+    ]);
+
+    $firstResponse = $this->actingAs($user)->post(route('researches.submit', $research));
+    $firstResponse->assertRedirect();
+
+    $research->refresh();
+
+    $this->actingAs($user)->post(route('researches.documents.store', $research), [
+        'document_class' => 'research_manuscript',
+        'file' => UploadedFile::fake()->create('manuscript-v2.pdf', 64, 'application/pdf'),
+    ])->assertRedirect();
+
+    $secondResponse = $this->actingAs($user)->post(route('researches.submit', $research));
+    $secondResponse->assertRedirect();
+
+    expect($research->fresh()->versions()->count())->toBe(2);
+    expect($research->fresh()->versions()->where('is_current', true)->count())->toBe(1);
+
+    $latestVersion = $research->fresh()->versions()->with('files')->latest('id')->firstOrFail();
+
+    expect($latestVersion->parent_version_id)->not->toBeNull();
+    expect($latestVersion->files()->count())->toBe(3);
+    expect($latestVersion->files()->where('document_name', 'Research Manuscript')->value('stored_file_name'))
+        ->not->toBe($manuscript->stored_filename);
 });
 
 test('submitted research information and proponents can still be updated', function () {
