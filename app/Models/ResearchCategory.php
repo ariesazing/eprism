@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class OrganizationalUnit extends Model
+class ResearchCategory extends Model
 {
     use HasFactory;
 
@@ -14,26 +14,15 @@ class OrganizationalUnit extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'unit_name',
-        'unit_code',
-        'unit_type',
-        'district',
-        'address',
+        'category_name',
+        'description',
     ];
-
-    /**
-     * @return HasMany<User, $this>
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
 
     /**
      * @return HasMany<Research, $this>
      */
     public function researches(): HasMany
     {
-        return $this->hasMany(\App\Models\Research::class);
+        return $this->hasMany(\App\Models\Research::class, 'category_id');
     }
 }

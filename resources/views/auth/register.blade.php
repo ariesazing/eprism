@@ -128,7 +128,7 @@
         <div
             x-show="showVerificationModal"
             x-transition
-            class="w-full max-w-lg rounded-xl bg-white p-5 sm:p-6 shadow-xl dark:bg-gray-800"
+            class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800"
             @click.away="showVerificationModal = false"
         >
             <h2 id="registration-verification-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">

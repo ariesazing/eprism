@@ -153,4 +153,20 @@ class User extends Authenticatable implements MustVerifyEmail
             $this->suffix,
         ])));
     }
+
+    /**
+     * @return HasMany<Research, $this>
+     */
+    public function ledResearches(): HasMany
+    {
+        return $this->hasMany(\App\Models\Research::class, 'lead_proponent_id');
+    }
+
+    /**
+     * @return HasMany<ResearchDocument, $this>
+     */
+    public function uploadedResearchDocuments(): HasMany
+    {
+        return $this->hasMany(\App\Models\ResearchDocument::class, 'uploaded_by');
+    }
 }

@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserStatusSeeder::class,
             OrganizationalUnitSeeder::class,
+            \Database\Seeders\ResearchCategorySeeder::class,
+            \Database\Seeders\ResearchStatusSeeder::class,
         ]);
 
         $adminRoleId = Role::query()->where('role_name', 'Administrator')->value('id');
