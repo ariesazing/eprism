@@ -7,10 +7,19 @@ use App\Models\ResearchDocument;
 use App\Models\ResearchVersion;
 use App\Models\SubmissionType;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 class ResearchVersioningService
 {
+    public function __construct(private readonly SramService $sramService)
+    {
+    }
+
     public function snapshotSubmission(
         Research $research,
         User $submittedBy,
@@ -30,6 +39,10 @@ class ResearchVersioningService
             ->first();
 
         if ($currentVersion && $this->matchesCurrentSnapshot($currentVersion, $documents)) {
+            if (! $currentVersion->sramResult()->exists()) {
+                $this->sramService->processVersion($currentVersion);
+            }
+
             return $currentVersion;
         }
 
@@ -37,7 +50,7 @@ class ResearchVersioningService
 
         $version = $research->versions()->create([
             'submission_type_id' => $submissionType->id,
-            'version_number' => $this->nextVersionNumber($research, $submissionType->id),
+            'version_number' => $this->nextVersionNumber($research),
             'parent_version_id' => $currentVersion?->id,
             'status_id' => $research->status_id,
             'is_current' => true,
@@ -59,7 +72,98 @@ class ResearchVersioningService
             ]);
         }
 
+        $this->sramService->processVersion($version);
+
         return $version;
+    }
+
+    /**
+     * @param array<int, array{document_name: string, file: UploadedFile}> $uploadedDocuments
+     */
+    public function createVersionFromUploadedFiles(
+        Research $research,
+        User $submittedBy,
+        array $uploadedDocuments,
+        string $submissionTypeName = 'Revision',
+        ?string $remarks = null,
+    ): ResearchVersion {
+        $storedPaths = [];
+
+        try {
+            /** @var ResearchVersion $version */
+            $version = DB::transaction(function () use (
+                $research,
+                $submittedBy,
+                $uploadedDocuments,
+                $submissionTypeName,
+                $remarks,
+                &$storedPaths,
+            ): ResearchVersion {
+                $hasExistingVersion = ResearchVersion::query()
+                    ->where('research_id', $research->id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                $effectiveSubmissionTypeName = $hasExistingVersion ? $submissionTypeName : 'Proposal';
+
+                $submissionType = SubmissionType::query()->firstOrCreate(
+                    ['type_name' => $effectiveSubmissionTypeName],
+                    ['description' => $effectiveSubmissionTypeName.' stage submission.']
+                );
+
+                $currentVersion = $research->versions()
+                    ->where('is_current', true)
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                $versionNumber = $hasExistingVersion ? $this->nextVersionNumber($research, true) : 1;
+
+                $research->versions()->where('is_current', true)->update(['is_current' => false]);
+
+                $version = $research->versions()->create([
+                    'submission_type_id' => $submissionType->id,
+                    'version_number' => $versionNumber,
+                    'parent_version_id' => $currentVersion?->id,
+                    'status_id' => $research->status_id,
+                    'is_current' => true,
+                    'submitted_by' => $submittedBy->id,
+                    'submitted_at' => now(),
+                    'remarks' => $remarks,
+                ]);
+
+                foreach ($uploadedDocuments as $document) {
+                    $file = $document['file'];
+                    $storedFilename = Str::uuid().'.'.$file->getClientOriginalExtension();
+                    $directory = 'research_versions/'.$research->research_code.'/v'.$versionNumber;
+                    $storedPath = $file->storeAs($directory, $storedFilename, 'local');
+                    $storedPaths[] = $storedPath;
+
+                    $version->files()->create([
+                        'document_name' => $document['document_name'],
+                        'original_file_name' => $file->getClientOriginalName(),
+                        'stored_file_name' => $storedFilename,
+                        'file_path' => $storedPath,
+                        'file_type' => (string) $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                        'uploaded_by' => $submittedBy->id,
+                        'uploaded_at' => now(),
+                    ]);
+                }
+
+                $this->sramService->processVersion($version);
+
+                return $version;
+            });
+
+            return $version->load(['files', 'sramResult.checks']);
+        } catch (Throwable $exception) {
+            if ($storedPaths !== []) {
+                Storage::disk('local')->delete($storedPaths);
+            }
+
+            throw $exception;
+        }
     }
 
     /**
@@ -75,12 +179,16 @@ class ResearchVersioningService
             ->values();
     }
 
-    private function nextVersionNumber(Research $research, int $submissionTypeId): int
+    private function nextVersionNumber(Research $research, bool $lockRows = false): int
     {
-        $latestVersionNumber = ResearchVersion::query()
-            ->where('research_id', $research->id)
-            ->where('submission_type_id', $submissionTypeId)
-            ->max('version_number');
+        $query = ResearchVersion::query()
+            ->where('research_id', $research->id);
+
+        if ($lockRows) {
+            $query->lockForUpdate();
+        }
+
+        $latestVersionNumber = $query->max('version_number');
 
         return ((int) $latestVersionNumber) + 1;
     }

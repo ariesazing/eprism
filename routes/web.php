@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Research\ResearchController;
 use App\Http\Controllers\Research\ResearchDocumentController;
 use App\Http\Controllers\Research\ResearchProponentController;
+use App\Http\Controllers\Research\ResearchVersionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,6 +36,11 @@ Route::middleware(['auth', 'approved', 'verified'])->group(function () {
     Route::resource('researches', ResearchController::class)->except(['edit']);
     Route::post('/researches/{research}/submit', [ResearchController::class, 'submit'])
         ->name('researches.submit');
+
+    Route::post('/researches/{research}/versions', [ResearchVersionController::class, 'store'])
+        ->name('researches.versions.store');
+    Route::get('/researches/{research}/versions/{version}/files/{file}/download', [ResearchVersionController::class, 'download'])
+        ->name('researches.versions.files.download');
 
     Route::post('/researches/{research}/documents', [ResearchDocumentController::class, 'store'])
         ->name('researches.documents.store');

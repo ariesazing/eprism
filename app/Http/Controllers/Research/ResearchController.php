@@ -36,7 +36,7 @@ class ResearchController extends Controller
             ])
             ->latest();
 
-        if ($user?->role?->role_name !== 'Administrator') {
+        if (in_array($user?->role?->role_name, ['Proponent'], true)) {
             $query->where('lead_proponent_id', $user?->id);
         }
 
@@ -65,6 +65,8 @@ class ResearchController extends Controller
         ResearchVersioningService $researchVersioningService,
     ): RedirectResponse
     {
+        $selectedCategory = ResearchCategory::query()->findOrFail((int) $request->integer('category_id'));
+
         for ($attempt = 0; $attempt < 3; $attempt++) {
             $storedDocumentPaths = [];
             $storedProponentPhotoPaths = [];
@@ -78,11 +80,11 @@ class ResearchController extends Controller
                 );
 
                 $research = Research::query()->create([
-                    'research_code' => $codeGenerator->generate(),
+                    'research_code' => $codeGenerator->generate($selectedCategory->category_name),
                     'title' => $request->string('title')->toString(),
                     'lead_proponent_id' => $request->user()->id,
                     'organizational_unit_id' => (int) $request->integer('organizational_unit_id'),
-                    'category_id' => (int) $request->integer('category_id'),
+                    'category_id' => $selectedCategory->id,
                     'status_id' => $submittedStatusId,
                     'submitted_at' => now(),
                     'approved_at' => null,
@@ -269,7 +271,7 @@ class ResearchController extends Controller
 
     public function show(Request $request, Research $research): View
     {
-        $this->authorizeAccess($request, $research);
+        $this->authorizeAccess($request, $research, true);
 
         $research->load([
             'leadProponent:id,first_name,last_name,email',
@@ -278,6 +280,9 @@ class ResearchController extends Controller
             'status:id,status_name',
             'proponents',
             'documents.uploader:id,first_name,last_name',
+            'versions' => fn ($query) => $query
+                ->with(['parentVersion:id,version_number', 'submitter:id,first_name,last_name', 'files', 'sramResult.checks'])
+                ->orderByDesc('version_number'),
         ]);
 
         return view('researches.show', [
@@ -353,11 +358,17 @@ class ResearchController extends Controller
         ];
     }
 
-    private function authorizeAccess(Request $request, Research $research): void
+    private function authorizeAccess(Request $request, Research $research, bool $allowReviewer = false): void
     {
         $user = $request->user();
 
-        if ($user?->role?->role_name === 'Administrator') {
+        $roleName = $user?->role?->role_name;
+
+        if ($roleName === 'Administrator') {
+            return;
+        }
+
+        if ($allowReviewer && $roleName === 'Reviewer') {
             return;
         }
 

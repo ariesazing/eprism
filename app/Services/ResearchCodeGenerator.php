@@ -6,10 +6,11 @@ use App\Models\Research;
 
 class ResearchCodeGenerator
 {
-    public function generate(): string
+    public function generate(string $categoryName): string
     {
+        $categoryPrefix = $this->resolveCategoryPrefix($categoryName);
         $year = now()->format('Y');
-        $prefix = 'RSH-'.$year.'-';
+        $prefix = $categoryPrefix.'-'.$year.'-';
 
         $latestCode = Research::withTrashed()
             ->where('research_code', 'like', $prefix.'%')
@@ -31,5 +32,14 @@ class ResearchCodeGenerator
         } while (Research::withTrashed()->where('research_code', $generatedCode)->exists());
 
         return $generatedCode;
+    }
+
+    private function resolveCategoryPrefix(string $categoryName): string
+    {
+        return match (strtolower(trim($categoryName))) {
+            'action research' => 'AR',
+            'basic research' => 'BR',
+            default => 'RSH',
+        };
     }
 }

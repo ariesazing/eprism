@@ -361,6 +361,147 @@
                     </table>
                 </div>
             </div>
+
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Version Control and SRAM Dashboard</h3>
+                        <p class="mt-1 text-sm text-gray-500">Each revised submission creates a new immutable version and runs SRAM automatically.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">Passed</span>
+                        <span class="rounded-full bg-rose-100 px-3 py-1 text-rose-700">Failed</span>
+                        <span class="rounded-full bg-sky-100 px-3 py-1 text-sky-700">Current Version</span>
+                    </div>
+                </div>
+
+                @php
+                    $versionHierarchy = $research->versions
+                        ->sortBy('version_number')
+                        ->map(fn ($version) => 'V'.$version->version_number)
+                        ->implode(' → ');
+                    $canCreateVersion = (int) $research->lead_proponent_id === (int) auth()->id();
+                @endphp
+
+                <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Version Hierarchy</p>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">{{ $versionHierarchy !== '' ? $versionHierarchy : 'No versions yet' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Total Versions</p>
+                        <p class="mt-2 text-2xl font-bold text-gray-900">{{ $research->versions->count() }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Latest SRAM</p>
+                        @php
+                            $latestVersion = $research->versions->first();
+                            $latestSram = $latestVersion?->sramResult;
+                        @endphp
+                        <p class="mt-2 text-lg font-semibold {{ $latestSram?->overall_result === 'Passed' ? 'text-emerald-700' : 'text-rose-700' }}">
+                            {{ $latestSram?->overall_result ?? 'Not yet evaluated' }}
+                        </p>
+                    </div>
+                </div>
+
+                @if ($canCreateVersion)
+                    <form method="POST" action="{{ route('researches.versions.store', $research) }}" enctype="multipart/form-data" class="mt-6 rounded-lg border border-sky-100 bg-sky-50 p-4">
+                        @csrf
+                        <h4 class="text-sm font-semibold text-sky-900">Create New Version Submission</h4>
+                        <p class="mt-1 text-xs text-sky-700">Only the lead proponent can submit a new version. Files are stored permanently and previous versions are preserved.</p>
+
+                        <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <x-input-label for="research_manuscript_file" :value="__('Research Manuscript (PDF)')" />
+                                <input id="research_manuscript_file" name="research_manuscript_file" type="file" accept=".pdf,application/pdf" class="mt-1 block w-full rounded-md border-gray-300" required />
+                                <x-input-error :messages="$errors->get('research_manuscript_file')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="narrative_form_file" :value="__('Narrative Form Document (PDF)')" />
+                                <input id="narrative_form_file" name="narrative_form_file" type="file" accept=".pdf,application/pdf" class="mt-1 block w-full rounded-md border-gray-300" required />
+                                <x-input-error :messages="$errors->get('narrative_form_file')" class="mt-2" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <x-input-label for="documentation_file" :value="__('Research Documentation (PDF)')" />
+                                <input id="documentation_file" name="documentation_file" type="file" accept=".pdf,application/pdf" class="mt-1 block w-full rounded-md border-gray-300" required />
+                                <x-input-error :messages="$errors->get('documentation_file')" class="mt-2" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <x-input-label for="remarks" :value="__('Revision Remarks (Optional)')" />
+                                <textarea id="remarks" name="remarks" rows="3" class="mt-1 block w-full rounded-md border-gray-300">{{ old('remarks') }}</textarea>
+                                <x-input-error :messages="$errors->get('remarks')" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <x-primary-button>Submit New Version</x-primary-button>
+                        </div>
+                    </form>
+                @endif
+
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead>
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Version</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Parent</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Status</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">SRAM</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Submitted By</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Submitted At</th>
+                                <th class="px-3 py-2 text-left font-semibold text-gray-600">Files</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($research->versions as $version)
+                                <tr>
+                                    <td class="px-3 py-2 text-gray-900 font-semibold">V{{ $version->version_number }}</td>
+                                    <td class="px-3 py-2 text-gray-700">{{ $version->parentVersion?->version_number ? 'V'.$version->parentVersion->version_number : 'N/A' }}</td>
+                                    <td class="px-3 py-2">
+                                        @if ($version->is_current)
+                                            <span class="rounded-full bg-sky-100 px-2 py-1 text-xs font-semibold text-sky-700">Current Version</span>
+                                        @else
+                                            <span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">Historical</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @if ($version->sramResult)
+                                            <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $version->sramResult->overall_result === 'Passed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
+                                                {{ $version->sramResult->overall_result }} ({{ number_format((float) $version->sramResult->overall_score, 2) }})
+                                            </span>
+                                            @php
+                                                $grammarCheck = $version->sramResult->checks->firstWhere('check_type', 'Grammar Checking');
+                                            @endphp
+                                            @if ($grammarCheck)
+                                                <p class="mt-1 text-xs text-gray-500">Grammar: {{ $grammarCheck->result }} - {{ $grammarCheck->remarks }}</p>
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400">Pending</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-gray-700">{{ $version->submitter?->full_name ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2 text-gray-700">{{ optional($version->submitted_at)?->format('M d, Y h:i A') ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2">
+                                        <div class="flex flex-col gap-1">
+                                            @forelse($version->files as $versionFile)
+                                                <a class="text-indigo-600 hover:text-indigo-700" href="{{ route('researches.versions.files.download', [$research, $version, $versionFile]) }}">
+                                                    Download {{ $versionFile->document_name }}
+                                                </a>
+                                            @empty
+                                                <span class="text-gray-400">No files</span>
+                                            @endforelse
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-3 py-4 text-center text-gray-500">No version history available yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

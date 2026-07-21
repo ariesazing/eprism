@@ -60,7 +60,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
+                <x-dropdown align="right" width="48" contentClasses="py-1 bg-white">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center gap-2 px-3 py-2 border border-violet-100 text-sm leading-4 font-medium rounded-xl text-gray-700 bg-white hover:bg-violet-50 focus:outline-none transition ease-in-out duration-150">
                             <span class="grid h-8 w-8 place-items-center rounded-full bg-violet-100 text-violet-700 text-xs font-bold">
@@ -80,7 +80,7 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile.edit')" class="text-black hover:bg-violet-50 focus:bg-violet-50">
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -88,7 +88,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
+                                <x-dropdown-link :href="route('logout')" class="text-black hover:bg-violet-50 focus:bg-violet-50"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
